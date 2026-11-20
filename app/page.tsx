@@ -1,69 +1,214 @@
-import Image from "next/image";
+
+"use client";
+
+import Link from "next/link";
+import { useState } from "react";
+
+// ==============================
+// 관리자 전용 설정
+// ==============================
+
+const ITEMS = [
+  "봐야한다",
+  "안봐야한다",
+  "안봐야한다",
+  "안봐야한다",
+  "안봐야한다",
+  "안봐야한다",
+];
+
+const SECRET_WINNER = "봐야한다";
+
+const COLORS = [
+  "#f87171",
+  "#fbbf24",
+  "#60a5fa",
+  "#34d399",
+  "#a78bfa",
+  "#fb923c",
+];
+
+// ==============================
 
 export default function Home() {
+  const [rotation, setRotation] = useState(0);
+  const [spinning, setSpinning] = useState(false);
+  const [result, setResult] = useState("");
+
+  function spin() {
+    if (spinning) return;
+
+    const targetIndex = ITEMS.indexOf(SECRET_WINNER);
+
+    if (targetIndex === -1) return;
+
+    setSpinning(true);
+    setResult("");
+
+    const segment = 360 / ITEMS.length;
+    const targetAngle =
+      360 - (targetIndex * segment + segment / 2);
+
+    const current = rotation % 360;
+    const delta =
+      (targetAngle - current + 360) % 360;
+
+    setRotation(rotation + 360 * 6 + delta);
+
+    setTimeout(() => {
+      setSpinning(false);
+      setResult(SECRET_WINNER);
+    }, 5200);
+  }
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <main
+      style={{
+        minHeight: "100vh",
+        background: "#111827",
+        color: "white",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 28,
+        padding: 24,
+        fontFamily: "sans-serif",
+      }}
+    >
+      <h1 style={{ fontSize: 34, fontWeight: 900 }}>
+        당신은 킹프리를
+      </h1>
+
+      <p style={{ color: "#9ca3af" }}>
+        룰렛 결과에 따르지 않을 시 사망합니다.
+      </p>
+
+      {/* 룰렛 */}
+      <div
+        style={{
+          position: "relative",
+          width: "min(82vw, 380px)",
+          aspectRatio: "1",
+        }}
+      >
+        {/* 화살표 */}
+        <div
+          style={{
+            position: "absolute",
+            top: -8,
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 5,
+            width: 0,
+            height: 0,
+            borderLeft: "16px solid transparent",
+            borderRight: "16px solid transparent",
+            borderTop: "32px solid white",
+          }}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+
+        {/* 룰렛판 */}
+        <div
+          style={{
+            width: "100%",
+            height: "100%",
+            borderRadius: "50%",
+            border: "5px solid white",
+            overflow: "hidden",
+            position: "relative",
+            background: `conic-gradient(${ITEMS.map(
+              (_, i) =>
+                `${COLORS[i % COLORS.length]} ${
+                  (i * 360) / ITEMS.length
+                }deg ${
+                  ((i + 1) * 360) / ITEMS.length
+                }deg`
+            ).join(",")})`,
+            transform: `rotate(${rotation}deg)`,
+            transition: spinning
+              ? "transform 5s cubic-bezier(0.15, 0.8, 0.15, 1)"
+              : "none",
+          }}
+        >
+          {ITEMS.map((item, i) => {
+            const angle =
+              (i + 0.5) * (360 / ITEMS.length);
+
+            return (
+              <div
+                key={i}
+                style={{
+                  position: "absolute",
+                  width: "100%",
+                  height: "100%",
+                  top: 0,
+                  left: 0,
+                  transform: `rotate(${angle}deg)`,
+                  display: "flex",
+                  justifyContent: "center",
+                  paddingTop: "18%",
+                  fontSize: "clamp(14px, 4vw, 20px)",
+                  fontWeight: 900,
+                  pointerEvents: "none",
+                }}
+              >
+                {item}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* 돌리기 */}
+      <button
+        onClick={spin}
+        disabled={spinning}
+        style={{
+          width: "min(100%, 340px)",
+          padding: 18,
+          borderRadius: 16,
+          border: "none",
+          background: spinning ? "#4b5563" : "#6366f1",
+          color: "white",
+          fontSize: 21,
+          fontWeight: 900,
+          cursor: spinning ? "not-allowed" : "pointer",
+        }}
+      >
+        {spinning ? "운명을 결정하는 중..." : "룰렛 돌리기"}
+      </button>
+
+      {/* 결과 */}
+      {result && (
+        <div
+          style={{
+            background: "#1f2937",
+            border: "1px solid #4b5563",
+            borderRadius: 18,
+            padding: 26,
+            width: "min(100%, 300px)",
+            textAlign: "center",
+          }}
+        >
+          <p style={{ color: "#9ca3af", marginBottom: 12 }}>
+            🎉 추첨 결과
           </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+
+          <h2
+            style={{
+              fontSize: 34,
+              fontWeight: 900,
+              color: "#fbbf24",
+            }}
           >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            {result}
+          </h2>
         </div>
-      </main>
-    </div>
+      )}
+
+      <Link href="/game"
+      className="game">최신 서브컬쳐 게임 순위 보러가기2026</Link>
+    </main>
   );
 }
