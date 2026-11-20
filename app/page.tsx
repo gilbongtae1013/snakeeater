@@ -65,7 +65,10 @@ export default function Home() {
     <main
       style={{
         minHeight: "100vh",
-        background: "#111827",
+        backgroundImage: "url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSjECEZ3g5TfbSfrf_UhrNlLt5JtaqvNvkj1vnkKtfHUw&s=10')",
+        backgroundSize: "500px",
+        backgroundPosition: "center",
+        backgroundRepeat: "repeat",
         color: "white",
         display: "flex",
         flexDirection: "column",
